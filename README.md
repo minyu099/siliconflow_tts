@@ -11,7 +11,7 @@
 - 📊 **音色管理** - 查看和管理所有音色
 - ⚙️ **API 配置** - 支持在线修改 API Key
 - 💰 **余额查询** - 实时查询账户余额
-- 本项目提供前端UI界面，便于使用。页面背景调用bing图片api，不喜欢直接按F5刷新
+- 本项目提供前端UI界面，便于使用。页面背景调用bing图片api，不喜欢可以点击导航栏左上角三叶草☘刷新背景
 - <img width="1910" height="873" alt="image" src="https://github.com/user-attachments/assets/ceccec4e-f08a-4f66-9e0b-d0b33dbba891" />
 
 
