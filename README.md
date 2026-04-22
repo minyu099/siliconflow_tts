@@ -1,6 +1,7 @@
 # SiliconFlow TTS Studio
 
 基于硅基流动（SiliconFlow）API 的文本转语音工具，支持自定义音色训练和多种系统音色。
+本项目需要注册登录硅基流动，硅基流动登录注册页面：https://cloud.siliconflow.cn/i/tyNkWQeb 填写我的邀请码：tyNkWQeb 领取16元免费额度
 
 ## 功能特点
 
@@ -10,6 +11,10 @@
 - 📊 **音色管理** - 查看和管理所有音色
 - ⚙️ **API 配置** - 支持在线修改 API Key
 - 💰 **余额查询** - 实时查询账户余额
+- 本项目提供前端UI界面，便于使用。页面背景调用bing图片api，不喜欢直接按F5刷新
+- <img width="1910" height="873" alt="image" src="https://github.com/user-attachments/assets/ceccec4e-f08a-4f66-9e0b-d0b33dbba891" />
+
+
 
 ## 系统预置音色
 
@@ -64,7 +69,7 @@ python launcher.py
 1. 点击左侧菜单"上传音色"
 2. 选择音频文件（建议 8-10 秒，发音清晰）
 3. 输入音色名称（只支持英文、数字、下划线、连字符）
-4. 输入参考文本（音频对应的文字内容）
+4. 输入参考文本（音频对应的文字内容，懒得打字可以搜一个提供stt服务的网站，比如https://turboscribe.ai/zh-CN/dashboard）
 5. 点击"上传"按钮
 6. 上传成功后，音色会自动同步到云端
 
@@ -161,15 +166,16 @@ A: 请检查 API Key 是否正确，或稍后重试。
 
 - **后端**: FastAPI + Python 3.8+
 - **前端**: HTML5 + CSS3 + JavaScript
-- **API**: SiliconFlow API
+- **API**: SiliconFlow API;Bing API
 
 ## 免责声明
 
-本项目仅供学习和研究使用，请遵守硅基流动的服务条款和相关法律法规。
+本项目仅供学习和研究使用，严禁商业售卖。生成内容使用请遵守硅基流动的服务条款和相关法律法规。
 
 ## Star History
 
 如果你觉得这个项目对你有帮助，欢迎给个 Star！⭐
+联系我：邮箱3127695049@qq.com
 
 ## License
 
