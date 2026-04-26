@@ -139,7 +139,7 @@
             if (!rawText) return alert('请填入待合成的文字！');
 
             // 【黑科技】将语气提示词巧妙地融合进文本中
-            const finalText = emotion ? `(${emotion}) ${rawText}` : rawText;
+            const finalText = emotion ? `${emotion}<|endofprompt|>${rawText}` : rawText;
 
             let finalVoice = "";
             if (voiceSelect.value === 'custom') {
