@@ -3,61 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的私人配音室</title>
+    <title>私人 AI 语音实验室</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-h-screen; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">🎤 私人语音合成站</h1>
-        <textarea id="text" class="w-full h-40 p-4 border border-gray-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="请输入要转换的文字..."></textarea>
-        <button id="btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg">开始合成</button>
-        <audio id="audio" class="w-full mt-6 hidden" controls></audio>
-        <p id="status" class="mt-4 text-sm text-gray-500 text-center"></p>
+<body class="flex items-center justify-center p-4">
+    <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-xl">
+        <div class="flex items-center justify-center mb-6">
+            <span class="text-4xl mr-3">🎙️</span>
+            <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">私人语音实验室</h1>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-semibold text-gray-600 mb-2">待合成文本</label>
+                <textarea id="text" class="w-full h-32 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="输入你想听的话..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">音色 ID (Voice ID)</label>
+                    <input id="voiceId" type="text" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" placeholder="粘贴 speech:xxxx">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">模型选择</label>
+                    <select id="model" class="w-full p-3 border border-gray-200 rounded-xl outline-none bg-white">
+                        <option value="FunAudioLLM/CosyVoice2-0.5B">CosyVoice2 (强烈推荐)</option>
+                        <option value="fishaudio/fish-speech-1.5">Fish Speech 1.5</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg">
+                立即合成语音
+            </button>
+
+            <div id="playerBox" class="hidden mt-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                <audio id="audio" class="w-full" controls></audio>
+            </div>
+
+            <p id="status" class="text-xs text-gray-400 text-center uppercase tracking-widest font-medium"></p>
+        </div>
     </div>
 
     <script>
         const btn = document.getElementById('btn');
         const textInput = document.getElementById('text');
+        const voiceInput = document.getElementById('voiceId');
+        const modelSelect = document.getElementById('model');
         const audio = document.getElementById('audio');
+        const playerBox = document.getElementById('playerBox');
         const status = document.getElementById('status');
+
+        // 这里建议你填入你默认常用的 ID
+        const defaultVoice = "你的默认ID填这里"; 
+        voiceInput.value = defaultVoice;
 
         btn.onclick = async () => {
             const text = textInput.value.trim();
-            if (!text) return alert('请输入文字');
+            const voice = voiceInput.value.trim();
+            if (!text || !voice) return alert('请填入文字和音色ID');
             
             btn.disabled = true;
-            btn.innerText = '合成中...';
-            status.innerText = '正在呼叫硅基流动服务器...';
+            btn.innerText = '✨ 正在魔法合成中...';
+            status.innerText = '连接硅基流动服务器...';
 
             try {
                 const response = await fetch('https://api.siliconflow.cn/v1/audio/speech', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer YOUR_API_KEY', // 这里会自动读取你填的环境变量，或者你直接贴Key
+                        'Authorization': 'Bearer 你的Key填这里',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "FunAudioLLM/CosyVoice2-0.5B",
+                        model: modelSelect.value,
                         input: text,
-                        voice: "speech:xxxx" // 这里填你喜欢的音色ID
+                        voice: voice
                     })
                 });
 
                 if (response.ok) {
                     const blob = await response.blob();
                     audio.src = URL.createObjectURL(blob);
-                    audio.classList.remove('hidden');
+                    playerBox.classList.remove('hidden');
                     audio.play();
-                    status.innerText = '合成成功！';
+                    status.innerText = 'SUCCESS: 合成完毕';
                 } else {
                     const err = await response.json();
-                    status.innerText = '出错啦: ' + (err.message || '未知错误');
+                    status.innerText = 'ERROR: ' + (err.message || '合成失败');
                 }
             } catch (e) {
-                status.innerText = '连接失败，请检查网络';
+                status.innerText = 'FAIL: 网络连接异常';
             } finally {
                 btn.disabled = false;
-                btn.innerText = '开始合成';
+                btn.innerText = '立即合成语音';
             }
         };
     </script>
