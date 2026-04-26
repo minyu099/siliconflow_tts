@@ -13,13 +13,13 @@
 <body class="flex items-center justify-center p-4">
     <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-xl">
         <div class="flex items-center justify-center mb-6">
-            <span class="text-4xl mr-3">🔐</span>
+            <span class="text-4xl mr-3">🎙️</span>
             <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">私人语音实验室</h1>
         </div>
 
         <div class="space-y-6">
             <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">硅基流动 API Key <span class="text-xs text-gray-400 font-normal ml-2">(仅保存在本地浏览器，不上传服务器)</span></label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">硅基流动 API Key</label>
                 <input id="apiKey" type="password" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" placeholder="请输入 sk- 开头的密钥">
             </div>
 
@@ -30,12 +30,27 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-600 mb-2">音色 ID</label>
-                    <input id="voiceId" type="text" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" placeholder="例如: speech:xxxx">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">选择音色</label>
+                    <select id="voiceSelect" class="w-full p-3 border border-gray-200 rounded-xl outline-none bg-white mb-2 cursor-pointer focus:ring-2 focus:ring-blue-400">
+                        <option value="custom">👉 自定义克隆音色...</option>
+                        <optgroup label="👩 官方女声">
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:anna">Anna (稳重女声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:bella">Bella (热情女声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:claire">Claire (温柔女声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:diana">Diana (欢快女声)</option>
+                        </optgroup>
+                        <optgroup label="👨 官方男声">
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:alex" selected>Alex (稳重男声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:benjamin">Benjamin (低沉男声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:charles">Charles (磁性男声)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:david">David (欢快男声)</option>
+                        </optgroup>
+                    </select>
+                    <input id="voiceId" type="text" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 hidden" placeholder="例如: speech:xxxx">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-2">模型选择</label>
-                    <select id="model" class="w-full p-3 border border-gray-200 rounded-xl outline-none bg-white">
+                    <select id="model" class="w-full p-3 border border-gray-200 rounded-xl outline-none bg-white cursor-pointer focus:ring-2 focus:ring-blue-400">
                         <option value="FunAudioLLM/CosyVoice2-0.5B">CosyVoice2 (强烈推荐)</option>
                         <option value="fishaudio/fish-speech-1.5">Fish Speech 1.5</option>
                     </select>
@@ -57,6 +72,7 @@
     <script>
         const btn = document.getElementById('btn');
         const textInput = document.getElementById('text');
+        const voiceSelect = document.getElementById('voiceSelect');
         const voiceInput = document.getElementById('voiceId');
         const apiKeyInput = document.getElementById('apiKey');
         const modelSelect = document.getElementById('model');
@@ -64,21 +80,38 @@
         const playerBox = document.getElementById('playerBox');
         const status = document.getElementById('status');
 
-        // 页面加载时，自动读取上次填过的 Key 和 音色ID
+        // 联动效果：选择自定义时，显示输入框；否则隐藏
+        voiceSelect.addEventListener('change', () => {
+            if (voiceSelect.value === 'custom') {
+                voiceInput.classList.remove('hidden');
+            } else {
+                voiceInput.classList.add('hidden');
+            }
+        });
+
+        // 读取本地缓存的 Key
         apiKeyInput.value = localStorage.getItem('my_saved_api_key') || '';
-        voiceInput.value = localStorage.getItem('my_saved_voice_id') || '';
+        const savedCustomId = localStorage.getItem('my_saved_voice_id');
+        if(savedCustomId) voiceInput.value = savedCustomId;
 
         btn.onclick = async () => {
             const text = textInput.value.trim();
-            const voice = voiceInput.value.trim();
             const apiKey = apiKeyInput.value.trim();
             
-            if (!apiKey) return alert('请先在上方填入你的 API Key！');
-            if (!text || !voice) return alert('请填入文字和音色ID！');
+            if (!apiKey) return alert('请先填入你的 API Key！');
+            if (!text) return alert('请填入待合成的文字！');
+
+            // 判断当前用的是官方音色还是自定义音色
+            let finalVoice = "";
+            if (voiceSelect.value === 'custom') {
+                finalVoice = voiceInput.value.trim();
+                if (!finalVoice) return alert('请填入自定义的音色 ID！');
+                localStorage.setItem('my_saved_voice_id', finalVoice);
+            } else {
+                finalVoice = voiceSelect.value;
+            }
             
-            // 点击合成时，自动把你填的 Key 和 ID 存在浏览器里，下次刷新就不用重填了
             localStorage.setItem('my_saved_api_key', apiKey);
-            localStorage.setItem('my_saved_voice_id', voice);
 
             btn.disabled = true;
             btn.innerText = '✨ 正在魔法合成中...';
@@ -94,7 +127,7 @@
                     body: JSON.stringify({
                         model: modelSelect.value,
                         input: text,
-                        voice: voice,
+                        voice: finalVoice,
                         response_format: "mp3"
                     })
                 });
@@ -107,7 +140,7 @@
                     status.innerText = 'SUCCESS: 合成完毕';
                 } else {
                     const err = await response.json();
-                    status.innerText = 'ERROR: ' + (err.message || '合成失败，请检查Key是否有效');
+                    status.innerText = 'ERROR: ' + (err.message || '合成失败，请检查音色ID或Key');
                 }
             } catch (e) {
                 status.innerText = 'FAIL: 网络连接异常';
